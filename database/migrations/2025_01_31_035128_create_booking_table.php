@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('day');
             $table->integer('quota');
             $table->uuid('clinic_id');
-            $table->time('open_time')->nullable();  
+            $table->time('open_time')->nullable();
             $table->time('close_time')->nullable();
             $table->foreign('clinic_id')->references('id')->on('clinics')->onDelete('cascade');
             $table->timestamps();

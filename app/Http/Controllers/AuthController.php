@@ -48,10 +48,15 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        $user = User::where('email', $request->email)->firstOrFail();
+
         return response()->json([
             'status' => 'success',
             'message' => 'User Login successfully',
-            'data' => $token,
+            'data' => [
+            'role'=> $user -> role,
+            'token' => $token,
+            ],
             'error' => null
         ]);
     }
@@ -64,16 +69,7 @@ class AuthController extends Controller
     public function me()
     {
         $user = auth()->user();
-    
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized',
-                'data' => null,
-                'error' => 'User not authenticated'
-            ], 401);
-        }
-    
+
         return response()->json([
             'status' => 'success',
             'message' => 'User retrieved successfully',
@@ -81,7 +77,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role, // Pastikan field 'role' ada di tabel users
+                'role' => $user->role,
             ],
             'error' => null
         ], 200);

@@ -33,7 +33,10 @@ class TransactionsUser extends Model
         'clinic_id',
         'admin_fee',
         'no_antrian',
-        'status'
+        'status',
+        'active_date',
+        'service_info_id',
+        'price'
     ];
 
     /**
@@ -58,5 +61,9 @@ class TransactionsUser extends Model
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
+    }
+    public function serviceInfo(): BelongsTo
+    {
+        return $this->belongsTo(ServiceInfo::class, 'service_info_id', 'id');
     }
 }

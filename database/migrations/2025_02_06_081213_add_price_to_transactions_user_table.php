@@ -14,15 +14,19 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions_user', function (Blueprint $table) {
-            $table->string('no_antrian')->after('status');
+            $table->string('price')->nullable(); 
         });
     }
-    
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::table('transactions_user', function (Blueprint $table) {
-            $table->dropColumn('no_antrian');
+            //
         });
     }
-    
 };

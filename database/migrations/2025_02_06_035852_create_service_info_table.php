@@ -13,8 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('booking', function (Blueprint $table) {
-            $table->string('day');
+        Schema::create('service_info', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('price');
+            $table->uuid('clinic_id');
+            $table->foreign('clinic_id')->references('id')->on('clinics')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('booking', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('service_info');
     }
 };
