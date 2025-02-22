@@ -23,11 +23,9 @@ class TransactionController extends Controller
     public function create(Request $request)
     {
 
-        $booking = Booking::findOrFail($request->booking_id);
         $serviceInfo = ServiceInfo::findOrFail($request->service_info_id);
 
         $validator = validator::make($request->all(), [
-            'booking_id' => 'required|uuid|exists:booking,id',
             'clinic_id' => 'required|uuid|exists:clinics,id',
             'service_info_id' => 'required|uuid'
         ]);
@@ -50,31 +48,13 @@ class TransactionController extends Controller
                 'message' => $validator->errors()
             ], 400);
         }
-
-        $hariIndonesia = $booking->day;
-
-        $hariInggris = [
-            'Minggu' => 'Sunday',
-            'Senin' => 'Monday',
-            'Selasa' => 'Tuesday',
-            'Rabu' => 'Wednesday',
-            'Kamis' => 'Thursday',
-            'Jumat' => 'Friday',
-            'Sabtu' => 'Saturday'
-        ];
-        
-        $hariEng = $hariInggris[$hariIndonesia];
-        
-        $today = new DateTime();
-        $today->modify('this ' . $hariEng); 
-        $formattedTanggal = $today->format('Y-m-d');
-
+     
         $nextQueueNumber = DB::table('transactions_user')
         ->where('clinic_id',  $request->clinic_id)
         ->max('no_antrian') + 1;
 
         $transactionCode = 'HUB' . now()->format('YmdHis') . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
-       
+        $bookingDate = \Carbon\Carbon::createFromFormat('d-m-Y', $request->booking_date)->format('Y-m-d');
         $transactionUser = TransactionsUser::create([
             'id' => (string) Str::uuid(),
             'admin_fee' => '10000',
@@ -82,14 +62,10 @@ class TransactionController extends Controller
             'transaction_code' => $transactionCode,
             'no_antrian' => $nextQueueNumber,
             'user_id' => $user,
-            'booking_id' => $request->booking_id,
             'clinic_id' => $request->clinic_id,
-            'active_date' => $formattedTanggal,
-            'service_info_id' => $request->service_info_id
+            'service_info_id' => $request->service_info_id,
+            'booking_date'=> $bookingDate
         ]);
-
-        $booking-> quota = $booking->quota - 1;
-        $booking->save();
 
         return response()->json([
             'success' => true,
@@ -101,11 +77,25 @@ class TransactionController extends Controller
     public function getAllByUserId()
 {
     $userId = auth()->user()->id;
-    
+    $today = Carbon::today()->format('Y-m-d');
+
     $transactions = TransactionsUser::where('user_id', $userId)
         ->orderByDesc('created_at')
-        ->with(['booking', 'clinic', 'serviceInfo'])
-        ->get();
+        ->with(['clinic', 'serviceInfo'])
+        ->get()
+        ->map(function ($transaction) use ($today) {
+            $bookingDate = Carbon::parse($transaction->booking_date)->format('Y-m-d');
+
+            if ($bookingDate === $today) {
+                $transaction->status = 'called';
+            } elseif ($bookingDate < $today) {
+                $transaction->status = 'expired';
+            } else {
+                $transaction->status = 'waiting';
+            }
+
+            return $transaction;
+        });
     
         return response()->json([
             'success' => true,
@@ -139,22 +129,26 @@ public function getDetailById($id)
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-public function getCekTransaction(Request $request)
-{
-    $userId = auth()->user()->id;
-    $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
-    ->where('user_id', $userId)
-    ->whereIn('status', ['waiting', 'called', 'active'])
-    ->exists();
+    public function getCekTransaction(Request $request)
+    {
+        $userId = auth()->user()->id;
+        $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
+            ->where('user_id', $userId)
+            ->first();
 
-    return response()->json([
-        'success' => 200,
-        'message' => 'success',
-        'data' => $cekExist
-    ], 200);
+
+        $cek = false;
+        if ($cekExist != null) {
+                $cek= true;
+            }
     
-}
-
+    
+        return response()->json([
+            'success' => 200,
+            'message' => 'success',
+            'data' => $cek
+        ], 200);
+    }
 
 public function currentQueue($clinicId)
 {

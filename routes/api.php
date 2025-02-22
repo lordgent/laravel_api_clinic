@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClinicsController;
 use App\Http\Controllers\ServiceInfoController;
 use App\Http\Controllers\TransactionController;
+use App\Models\ServiceInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,7 @@ Route::middleware('auth:api')->group(function () {
 
         Route::middleware('role:admin')->group(function () {
         Route::get('admin/categories', [CategoryController::class, 'index']);
+        Route::get('admin/all-clinics',[ServiceInfoController::class, 'getAllClinics']);
         Route::post('admin/add-category', [CategoryController::class, 'store']);
         Route::post('admin/clinic', [ClinicsController::class, 'addClinic']);
         Route::post('admin/clinic/queque', [ClinicsController::class, 'createScedhule']);

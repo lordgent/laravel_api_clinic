@@ -30,13 +30,12 @@ return new class extends Migration
             $table->string('no_antrian');
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->uuid('booking_id');
-            $table->foreign('booking_id')->references('id')->on('booking')->onDelete('cascade');
             $table->uuid('clinic_id');
             $table->foreign('clinic_id')->references('id')->on('clinics')->onDelete('cascade');
             $table->timestamps();
             $table->date('active_date')->nullable();
             $table->uuid('service_info_id');
+            $table->date('booking_date')->nullable();
             $table->foreign('service_info_id')->references('id')->on('clinics')->onDelete('cascade');
         });
     }

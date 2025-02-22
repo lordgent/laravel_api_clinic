@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('booking', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->date('available_date');
+            $table->date('available_date')->nullable(); 
             $table->string('day');
             $table->integer('quota');
             $table->uuid('clinic_id');

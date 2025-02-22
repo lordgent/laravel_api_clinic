@@ -29,16 +29,19 @@ class TransactionsUser extends Model
     protected $fillable = [
         'transaction_code',
         'user_id',
-        'booking_id',
         'clinic_id',
         'admin_fee',
         'no_antrian',
         'status',
         'active_date',
         'service_info_id',
-        'price'
+        'price',
+        'booking_date'
     ];
 
+    protected $casts = [
+        'booking_date' => 'date:Y-m-d',
+    ];
     /**
      * Get the user associated with the transaction.
      */
@@ -50,10 +53,6 @@ class TransactionsUser extends Model
     /**
      * Get the booking associated with the transaction.
      */
-    public function booking(): BelongsTo
-    {
-        return $this->belongsTo(Booking::class);
-    }
 
     /**
      * Get the clinic associated with the transaction.

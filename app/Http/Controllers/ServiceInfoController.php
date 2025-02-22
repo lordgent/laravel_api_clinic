@@ -49,5 +49,24 @@ class ServiceInfoController extends Controller
     ], 200);
 }
 
+public function getAllClinics()
+{
+    $clinics = Clinic::all();
+
+    if ($clinics->isEmpty()) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'No clinics found'
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Clinics fetched successfully',
+        'data' => $clinics
+    ], 200);
+}
+
+
 
 }

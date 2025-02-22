@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions_user', function (Blueprint $table) {
-            $table->string('price')->nullable(); 
+            $table->dropForeign(['booking_id']);
+            $table->dropColumn('booking_id'); // Hapus kolom booking_id
         });
     }
 
