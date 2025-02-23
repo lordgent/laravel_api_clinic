@@ -155,7 +155,6 @@ public function currentQueue($clinicId)
     $today = Carbon::today()->toDateString();
 
     $currentQueue = TransactionsUser::whereDate('active_date', $today)
-        ->where('status', 'active')
         ->when($clinicId, function ($query) use ($clinicId) {
             return $query->where('clinic_id', $clinicId);
         })
