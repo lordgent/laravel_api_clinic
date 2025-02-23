@@ -88,8 +88,6 @@ class TransactionController extends Controller
 
             if ($bookingDate === $today && $transaction->status !== 'active' && $transaction->status !== 'completed') {
                 $transaction->status = 'called';
-            } elseif ($bookingDate < $today) {
-                $transaction->status = 'expired';
             } else {
                 $transaction->status;
             }
