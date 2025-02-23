@@ -133,16 +133,17 @@ public function getDetailById($id)
     {
         $userId = auth()->user()->id;
 
-        $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
+        $latestTransaction = TransactionsUser::where('clinic_id', $request->clinic_id)
         ->where('user_id', $userId)
-        ->whereIn('status', ['active', 'completed', 'called','waiting']) 
-        ->orderByDesc('created_at')
+        ->orderByDesc('created_at') 
         ->first();
+
+    $isRestrictedStatus = $latestTransaction && in_array($latestTransaction->status, ['waiting', 'called', 'completed','active']);
 
         return response()->json([
             'success' => true,
             'message' => 'success',
-            'data' => !$cekExist
+            'data' => $isRestrictedStatus
         ], 200);
     }
     
