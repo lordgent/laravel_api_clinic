@@ -154,7 +154,8 @@ public function currentQueue($clinicId)
 {
     $today = Carbon::today()->toDateString();
 
-    $currentQueue = TransactionsUser::whereDate('active_date', $today)
+    $currentQueue = TransactionsUser::whereDate('booking_date', $today)
+    ->where('status', 'active')
         ->when($clinicId, function ($query) use ($clinicId) {
             return $query->where('clinic_id', $clinicId);
         })
@@ -190,7 +191,7 @@ public function currentQueue($clinicId)
 public function listQueue($clinicId)
 {
     $today = Carbon::today()->toDateString();
-    $queues = TransactionsUser::whereDate('active_date', $today)
+    $queues = TransactionsUser::whereDate('booking_date', $today)
     ->where('transactions_user.clinic_id', $clinicId) 
     ->join('users', 'transactions_user.user_id', '=', 'users.id')
     ->orderBy('transactions_user.no_antrian', 'asc')
@@ -199,8 +200,20 @@ public function listQueue($clinicId)
         'transactions_user.no_antrian as queue_number',
         'transactions_user.status',
         'users.name as patient_name'
-    ]);
+    ])
+    ->map(function ($transaction) use ($today) {
+        $bookingDate = Carbon::parse($transaction->booking_date)->format('Y-m-d');
 
+        if ($bookingDate === $today && $transaction->status !== "active" && $transaction->status !== "completed") {
+            $transaction->status = 'called';
+        } elseif ($bookingDate < $today) {
+            $transaction->status = 'expired';
+        } else {
+            $transaction->status;
+        }
+
+        return $transaction;
+    });
 
         return response()->json([
             'success' => 200,
@@ -234,33 +247,33 @@ public function callNextPatient($clinicId)
     return response()->json(['message' => 'Antrean diperbarui']);
 }
 
-public function updateStatus(Request $request)
+
+public function updateStatusTransactionUser(Request $request, $id)
 {
     $request->validate([
-        'transaction_id' => 'required',
+        'status' => 'required|string|in:approve,expired,completed',
     ]);
 
-    $transaction = TransactionsUser::where('id', $request->transaction_id)->first();
-    
+    $transaction = TransactionsUser::find($id);
     if (!$transaction) {
         return response()->json(['message' => 'Transaction not found'], 404);
     }
 
-    DB::beginTransaction();
-    try {
-        $transaction->update(['status' => 'active']);
-        DB::commit();
-        
-        return response()->json([
-            'success' => 200,
-            'message' => 'success',
-            'data' => $transaction
-        ], 200);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['message' => 'Failed to update transaction status', 'error' => $e->getMessage()], 500);
+    if ($request->status === 'approve') {
+        $transaction->status = 'active';
+    } else if ($request->status === 'skip') {
+        $transaction->status = 'missed';
+    } else if($request->status === 'completed'){
+        $transaction->status = 'completed';
     }
+
+    $transaction->save();
+
+    return response()->json([
+        'message' => 'Transaction status updated successfully',
+        'data' => $transaction
+    ]);
 }
+
 
 }

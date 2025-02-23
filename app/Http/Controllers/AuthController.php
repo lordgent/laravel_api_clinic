@@ -19,26 +19,36 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
         ]);
-
+    
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
         }
-
+    
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email is already registered',
+                'errors' => ['email' => 'This email is already in use.']
+            ], 400); 
+        }
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
+    
         return response()->json([
             'status' => 'success',
             'message' => 'User registered successfully',
-            'data' => [
-                'user' => $user,
-            ],
+            'data' => ['user' => $user],
             'error' => null
-        ]); 
-     }
+        ], 200); 
+    }
 
     public function login(Request $request)
     {

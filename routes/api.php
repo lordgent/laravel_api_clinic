@@ -40,8 +40,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('admin/service-info', [ServiceInfoController::class, 'store']);
         Route::get('admin/active-queque/{clinicId}', [TransactionController::class, 'listQueue']);
         Route::get('admin/current-queque/{clinicId}', [TransactionController::class, 'currentQueue']);
-        Route::post('admin/transaction-update',[TransactionController::class,'updateStatus']);
-        
+        Route::put('admin/transactions/{id}/status', [TransactionController::class, 'updateStatusTransactionUser']);
     });
 });
 
