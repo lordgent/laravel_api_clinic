@@ -86,12 +86,12 @@ class TransactionController extends Controller
         ->map(function ($transaction) use ($today) {
             $bookingDate = Carbon::parse($transaction->booking_date)->format('Y-m-d');
 
-            if ($bookingDate === $today) {
+            if ($bookingDate === $today && $transaction->status !== 'active' && $transaction->status !== 'completed') {
                 $transaction->status = 'called';
             } elseif ($bookingDate < $today) {
                 $transaction->status = 'expired';
             } else {
-                $transaction->status = 'waiting';
+                $transaction->status;
             }
 
             return $transaction;
