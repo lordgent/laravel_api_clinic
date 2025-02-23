@@ -134,21 +134,17 @@ public function getDetailById($id)
         $userId = auth()->user()->id;
         $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
             ->where('user_id', $userId)
-            ->first();
-
-
-        $cek = false;
-        if ($cekExist != null) {
-                $cek= true;
-            }
-    
+            ->whereIn('status', ['active', 'completed']) // Perbaikan kondisi status
+            ->whereDate('booking_date', now()->toDateString())
+            ->exists(); 
     
         return response()->json([
-            'success' => 200,
+            'success' => true,
             'message' => 'success',
-            'data' => $cek
+            'data' => !$cekExist
         ], 200);
     }
+    
 
 public function currentQueue($clinicId)
 {
