@@ -135,9 +135,9 @@ public function getDetailById($id)
 
         $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
         ->where('user_id', $userId)
-        ->whereIn('status', ['active', 'completed', 'called','waiting']) 
-        ->exists(); 
-        
+        ->whereIn('status', ['active', 'completed', 'called','waiting'])
+        ->exists();
+
         return response()->json([
             'success' => true,
             'message' => 'success',
