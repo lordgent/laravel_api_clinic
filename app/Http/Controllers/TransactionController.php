@@ -132,12 +132,15 @@ public function getDetailById($id)
     public function getCekTransaction(Request $request)
     {
         $userId = auth()->user()->id;
+        $today = Carbon::today()->toDateString(); 
+
         $cekExist = TransactionsUser::where('clinic_id', $request->clinic_id)
-        ->where('user_id', $userId)
-        ->whereIn('status', ['active', 'completed'])
-        ->whereDate('booking_date', '>=', now()->toDateString())
-        ->exists();
-    
+            ->where('user_id', $userId)
+            ->whereIn('status', ['active', 'completed']) 
+            ->whereDate('booking_date', '>=', $today)
+            ->exists(); 
+
+            
         return response()->json([
             'success' => true,
             'message' => 'success',
