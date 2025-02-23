@@ -136,9 +136,9 @@ public function getDetailById($id)
         $latestTransaction = TransactionsUser::where('clinic_id', $request->clinic_id)
         ->where('user_id', $userId)
         ->orderByDesc('created_at') 
-        ->first();
+        ->first(); 
 
-    $isRestrictedStatus = $latestTransaction && in_array($latestTransaction->status, ['waiting', 'called', 'completed','active']);
+    $isRestrictedStatus = $latestTransaction && in_array($latestTransaction->status, ['waiting', 'called','active']);
 
         return response()->json([
             'success' => true,
